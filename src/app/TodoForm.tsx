@@ -1,16 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const ToDoForm = () => {
   const [task, setTask] = useState<string>("");
-  const [toDoList, setToDoList] = useState<string[]>([]);
+  const [todos, setTodos] = useState<string[]>([]);
+
+  useEffect(() => {
+    // コンポーネントがマウントされた後にlocalStorageからデータを取得
+    const storedTodos = Object.keys(localStorage);
+    setTodos(storedTodos);
+  }, []);
 
   const handleAddTodo = () => {
-    if (task) {
-      setToDoList([...toDoList, task]);
+    if (task && !todos.includes(task)) {
+      localStorage.setItem(task, task);
+      setTodos([...todos, task]);
       setTask("");
+    } else if (task === "") {
+      alert("タスクを入力してください");
+    } else {
+      alert("既に同じタスクがあります");
     }
+  };
+
+  const handleDeleteTodo = (task: string) => {
+    localStorage.removeItem(task);
+    setTodos(todos.filter((todo) => todo !== task));
   };
 
   return (
@@ -18,6 +34,7 @@ export const ToDoForm = () => {
       <div className="flex justify-between gap-4 flex-nowrap">
         <input
           type="text"
+          id="task"
           placeholder="タスクを入力"
           value={task}
           onChange={(event) => setTask(event.target.value)}
@@ -30,20 +47,21 @@ export const ToDoForm = () => {
           追加
         </button>
       </div>
-      {toDoList.length !== 0 && (
+      {todos.length !== 0 ? (
         <ul className="main-border p-4 rounded-md">
-          {toDoList.map((todo, index) => (
-            <li
-              key={todo}
-              className={`py-4 flex items-center justify-between ${
-                index !== toDoList.length - 1 ? "border-b border-gray-400" : ""
-              }`}
-            >
+          {todos.map((todo) => (
+            <li key={todo} className="py-1 flex items-center justify-between">
               <p className="text-lg">{todo}</p>
-              <input type="checkbox" className="w-6 h-6 rounded-lg" />
+              <input
+                type="checkbox"
+                className="w-6 h-6 rounded-lg cursor-pointer"
+                onClick={() => handleDeleteTodo(todo)}
+              />
             </li>
           ))}
         </ul>
+      ) : (
+        <p className="text-lg">タスクはありません</p>
       )}
     </div>
   );
