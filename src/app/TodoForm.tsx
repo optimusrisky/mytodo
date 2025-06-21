@@ -62,6 +62,10 @@ export const ToDoForm = () => {
       localStorage.setItem(id, JSON.stringify(todo));
       setTodos(todos);
     }
+    const completedTodos = todos.filter((todo) => todo.isDone);
+    if (completedTodos.length === todos.length) {
+      alert("今日のタスクをすべて完了しました。お疲れ様！");
+    }
   };
 
   return (
